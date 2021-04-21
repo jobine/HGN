@@ -16,3 +16,6 @@ KNOWLEDGE_FOLDER = join(HOME_DATA_FOLDER, 'knowledge')
 OUTPUT_FOLDER = join(HOME_DATA_FOLDER, 'outputs')
 
 os.environ['PYTORCH_PRETRAINED_BERT_CACHE'] = join(HOME_DATA_FOLDER, 'models', 'pretrained_cache')
+
+# Run on CPU
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
