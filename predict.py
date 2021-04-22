@@ -64,7 +64,7 @@ logger.info("Loading model from: {}".format(model_path))
 encoder, _ = load_encoder_model(args.encoder_name_or_path, args.model_type)
 
 if encoder_path is not None:
-    encoder.load_state_dict(torch.load(encoder_path))
+    encoder.load_state_dict(torch.load(encoder_path), strict=False)
 
 # torch.cuda.empty_cache()
 encoder.to(args.device)
