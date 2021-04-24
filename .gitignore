@@ -3,3 +3,4 @@ data/
 *.tar.gz
 .idea/
 venv/
+data.old/

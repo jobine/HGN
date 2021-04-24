@@ -2,7 +2,7 @@
 
 # DEFINE data related (please make changes according to your configurations)
 # DATA ROOT folder where you put data files
-DATA_ROOT=./data/
+DATA_ROOT=./data
 
 
 PROCS=${1:-"download"} # define the processes you want to run, e.g. "download,preprocess,train" or "preprocess" only
@@ -16,20 +16,43 @@ export PYTHONPATH=$PYTHONPATH:$DIR_TMP:$DIR_TMP/transformers
 export PYTORCH_PRETRAINED_BERT_CACHE=$DATA_ROOT/models/pretrained_cache
 
 mkdir -p $DATA_ROOT/models/pretrained_cache
+mkdir -p $DATA_ROOT/dataset/data_raw
+mkdir -p $DATA_ROOT/knowledge
 
 # 0. Build Database from Wikipedia
 download() {
-    [[ -d $DATA_ROOT ]] || mkdir -p $DATA_ROOT/dataset/data_raw; mkdir -p $DATA_ROOT/knowledge
+    if [[ ! -f $DATA_ROOT/dataset/data_raw/hotpot_train_v1.1.json ]]; then
+      echo "Downloading http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_train_v1.1.json"
+      curl -o $DATA_ROOT/dataset/data_raw/hotpot_train_v1.1.json http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_train_v1.1.json
+    fi
 
-    wget -P $DATA_ROOT/dataset/data_raw/ http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_train_v1.1.json
-    wget -P $DATA_ROOT/dataset/data_raw/ http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_distractor_v1.json
-    wget -P $DATA_ROOT/dataset/data_raw http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_fullwiki_v1.json
-    wget -P $DATA_ROOT/dataset/data_raw/ http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_test_fullwiki_v1.json
+    if [[ ! -f $DATA_ROOT/dataset/data_raw/hotpot_dev_distractor_v1.json ]]; then
+      echo "Downloading http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_distractor_v1.json"
+      curl -o $DATA_ROOT/dataset/data_raw/hotpot_dev_distractor_v1.json http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_distractor_v1.json
+    fi
+
+    if [[ ! -f $DATA_ROOT/dataset/data_raw/hotpot_dev_fullwiki_v1.json ]]; then
+      echo "Downloading http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_fullwiki_v1.json"
+      curl -o $DATA_ROOT/dataset/data_raw/hotpot_dev_fullwiki_v1.json http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_fullwiki_v1.json
+    fi
+
+    if [[ ! -f $DATA_ROOT/dataset/data_raw/hotpot_test_fullwiki_v1.json ]]; then
+      echo "Downloading http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_test_fullwiki_v1.json"
+      curl -o $DATA_ROOT/dataset/data_raw/hotpot_test_fullwiki_v1.json http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_test_fullwiki_v1.json
+    fi
+
     if [[ ! -f $DATA_ROOT/knowledge/enwiki_ner.db ]]; then
-        wget -P $DATA_ROOT/knowledge/ https://nlp.stanford.edu/projects/hotpotqa/enwiki-20171001-pages-meta-current-withlinks-abstracts.tar.bz2
+      if [[ ! -f $DATA_ROOT/knowledge/enwiki-20171001-pages-meta-current-withlinks-abstracts.tar.bz2 ]]; then
+        echo "Downloading https://nlp.stanford.edu/projects/hotpotqa/enwiki-20171001-pages-meta-current-withlinks-abstracts.tar.bz2"
+        curl -o $DATA_ROOT/knowledge/enwiki-20171001-pages-meta-current-withlinks-abstracts.tar.bz2 https://nlp.stanford.edu/projects/hotpotqa/enwiki-20171001-pages-meta-current-withlinks-abstracts.tar.bz2
+      fi
+
+      if [[ ! -d $DATA_ROOT/knowledge/enwiki-20171001-pages-meta-current-withlinks-abstracts ]]; then
         tar -xjvf $DATA_ROOT/knowledge/enwiki-20171001-pages-meta-current-withlinks-abstracts.tar.bz2 -C $DATA_ROOT/knowledge
-        # Required: DrQA and Spacy
-        python scripts/0_build_db.py $DATA_ROOT/knowledge/enwiki-20171001-pages-meta-current-withlinks-abstracts $DATA_ROOT/knowledge/enwiki_ner.db
+      fi
+
+      # Required: DrQA and Spacy
+      python scripts/0_build_db.py $DATA_ROOT/knowledge/enwiki-20171001-pages-meta-current-withlinks-abstracts $DATA_ROOT/knowledge/enwiki_ner.db
     fi
 }
 
