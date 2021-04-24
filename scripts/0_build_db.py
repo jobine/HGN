@@ -18,7 +18,8 @@ import spacy
 
 from multiprocessing import Pool as ProcessPool
 from tqdm import tqdm
-from drqa.retriever import utils
+# from drqa.retriever import utils
+import unicodedata
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -47,6 +48,10 @@ def import_module(filename):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def normalize(text):
+    unicodedata.normalize('NFD', text)
 
 
 # ------------------------------------------------------------------------------
@@ -90,7 +95,7 @@ def get_contents(filename):
                 _text_ner.append(ent_list)
             _text_ner_str = pickle.dumps(_text_ner)
 
-            documents.append((utils.normalize(doc['id']), doc['url'], doc['title'], _text, _text_with_links, _text_ner_str, len(doc['text'])))
+            documents.append((normalize(doc['id']), doc['url'], doc['title'], _text, _text_with_links, _text_ner_str, len(doc['text'])))
 
     return documents
 

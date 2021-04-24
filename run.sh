@@ -52,6 +52,11 @@ download() {
       fi
 
       # Required: DrQA and Spacy
+      # use python3 when not in venv for mac
+      echo "Checking spaCy package en_core_web_lg"
+      python -m spacy download en_core_web_lg
+
+      echo "Building db"
       python scripts/0_build_db.py $DATA_ROOT/knowledge/enwiki-20171001-pages-meta-current-withlinks-abstracts $DATA_ROOT/knowledge/enwiki_ner.db
     fi
 }
