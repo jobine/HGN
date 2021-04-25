@@ -51,13 +51,16 @@ download() {
         tar -xjvf $DATA_ROOT/knowledge/enwiki-20171001-pages-meta-current-withlinks-abstracts.tar.bz2 -C $DATA_ROOT/knowledge
       fi
 
-      # Required: DrQA and Spacy
-      # use python3 when not in venv for mac
+      # Required: Spacy
       echo "Checking spaCy package en_core_web_lg"
-      python -m spacy download en_core_web_lg
+      python -m spacy info en_core_web_lg || echo "Downloading spaCy package en_core_web_lg";python -m spacy download en_core_web_lg
 
-      echo "Building db"
-      python scripts/0_build_db.py $DATA_ROOT/knowledge/enwiki-20171001-pages-meta-current-withlinks-abstracts $DATA_ROOT/knowledge/enwiki_ner.db
+      if [[ ! -f $DATA_ROOT/knowledge/enwiki_ner.db ]]; then
+        echo "Building db"
+        python scripts/0_build_db.py $DATA_ROOT/knowledge/enwiki-20171001-pages-meta-current-withlinks-abstracts $DATA_ROOT/knowledge/enwiki_ner.db
+      fi
+    else
+      echo "Found $DATA_ROOT/knowledge/enwiki_ner.db!"
     fi
 }
 
