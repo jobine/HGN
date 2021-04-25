@@ -13,25 +13,35 @@ import json
 
 from os.path import join
 from collections import Counter
-from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,
-                              TensorDataset)
+from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler, TensorDataset)
 from torch.utils.data.distributed import DistributedSampler
 from tensorboardX import SummaryWriter
 from tqdm import tqdm, trange
 
 # This line must be above local package reference
 from transformers import (BertConfig, BertForSequenceClassification, BertTokenizer,
-                          RobertaConfig, RobertaTokenizer, RobertaForSequenceClassification)
+                          RobertaConfig, RobertaTokenizer, RobertaForSequenceClassification,
+                          DebertaV2Config, DebertaV2Tokenizer, DebertaV2ForSequenceClassification)
 
 from utils.feature_extraction import (convert_examples_to_features, output_modes, processors)
 
-ALL_MODELS = sum((tuple(conf.pretrained_config_archive_map.keys()) for conf in (BertConfig, RobertaConfig)), ())
+# ALL_MODELS = sum((tuple(conf.pretrained_config_archive_map.keys()) for conf in (BertConfig, RobertaConfig)), ())
+from transformers import BERT_PRETRAINED_CONFIG_ARCHIVE_MAP, DEBERTA_V2_PRETRAINED_CONFIG_ARCHIVE_MAP
+
+ALL_MODELS = sum((tuple(conf.keys()) for conf in (BERT_PRETRAINED_CONFIG_ARCHIVE_MAP, DEBERTA_V2_PRETRAINED_CONFIG_ARCHIVE_MAP)), ())
+
 MODEL_CLASSES = {
     'bert': (BertConfig, BertForSequenceClassification, BertTokenizer),
-    'roberta': (RobertaConfig, RobertaForSequenceClassification, RobertaTokenizer)
+    'deberta-v2': (DebertaV2Config, DebertaV2ForSequenceClassification, DebertaV2Tokenizer)
 }
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+fmt = logging.Formatter('%(asctime)s: [ %(message)s ]', '%m/%d/%Y %I:%M:%S %p')
+console = logging.StreamHandler()
+console.setFormatter(fmt)
+logger.addHandler(console)
+
 
 def evaluate(args, model, tokenizer, prefix=""):
     # Loop to handle MNLI double evaluation (matched, mis-matched)
@@ -122,6 +132,7 @@ def rank_paras(data, pred_score):
 
     return ranked_paras
 
+
 def load_and_cache_examples(args, task, tokenizer, evaluate=False):
     processor = processors[task]()
     output_mode = output_modes[task]
@@ -132,7 +143,7 @@ def load_and_cache_examples(args, task, tokenizer, evaluate=False):
             cls_token_at_end=bool(args.model_type in ['xlnet']),            # xlnet has a cls token at the end
             cls_token=tokenizer.cls_token,
             sep_token=tokenizer.sep_token,
-            sep_token_extra=bool(args.model_type in ["roberta"]),
+            sep_token_extra=bool(args.model_type in ["deberta-v2"]),
             cls_token_segment_id=2 if args.model_type in ['xlnet'] else 0,
             pad_on_left=bool(args.model_type in ['xlnet']),                 # pad on the left for xlnet
             pad_token_segment_id=4 if args.model_type in ['xlnet'] else 0)
@@ -192,6 +203,7 @@ def set_args():
 
     return args
 
+
 if __name__ == "__main__":
     args = set_args()
 
@@ -204,6 +216,11 @@ if __name__ == "__main__":
     num_labels = len(label_list)
 
     args.model_type = args.model_type.lower()
+
+    args_dict = vars(args)
+    for a in args_dict:
+        logger.info('%-28s  %s' % (a, args_dict[a]))
+
     config_class, model_class, tokenizer_class = MODEL_CLASSES[args.model_type]
     config = config_class.from_pretrained(args.config_name if args.config_name else args.model_name_or_path,
                                           num_labels=num_labels,
@@ -212,7 +229,7 @@ if __name__ == "__main__":
                                                 do_lower_case=args.do_lower_case)
 
     # Load a trained model that you have fine-tuned
-    model_state_dict = torch.load(args.eval_ckpt)
+    model_state_dict = torch.load(args.eval_ckpt, map_location=torch.device('cpu')) #if args.device == 'cpu' else torch.load(args.eval_ckpt)
     model = model_class.from_pretrained(args.model_name_or_path,
                                         config=config,
                                         state_dict=model_state_dict)

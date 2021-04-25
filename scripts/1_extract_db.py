@@ -4,21 +4,26 @@ import sys
 import unicodedata
 import re
 import pickle
+import os
 
 from urllib.parse import unquote
 from tqdm import tqdm
 
-#input:
+# input:
 input_file = sys.argv[1]
 db_path = sys.argv[2]
-#output
+
+# output
 output_file = sys.argv[3]
 
 EDGE_XY = re.compile(r'<a href="(.*?)">(.*?)</a>')
+
+
 def get_edges(sentence):
-    #ret = EDGE_XY.findall(sentence)
+    # ret = EDGE_XY.findall(sentence)
     ret = EDGE_XY.findall(sentence + '</a>')
     return [(unquote(x), y) for x, y in ret]
+
 
 def normalize(text):
     """Resolve different type of unicode encodings."""
@@ -61,17 +66,16 @@ class DocDB(object):
         """Fetch the raw text of the doc for 'doc_id'."""
         cursor = self.connection.cursor()
         cursor.execute(
-            "SELECT {} FROM documents WHERE id = ?".format(key),
-            (normalize(doc_id),)
+            "SELECT {} FROM documents WHERE id = ?".format(key), (normalize(doc_id),)
         )
         result = cursor.fetchone()
         cursor.close()
+
         return result if result is None else result[0]
 
     def get_doc_text(self, doc_id):
         """Fetch the raw text of the doc for 'doc_id'."""
         return self._get_doc_key(doc_id, 'text')
-
 
     def get_doc_sent_num(self, doc_id):
         return int(self._get_doc_key(doc_id, 'sent_num'))
@@ -87,6 +91,7 @@ class DocDB(object):
 
     def get_doc_title(self, doc_id):
         return self._get_doc_key(doc_id, 'title')
+
 
 doc_db = DocDB(db_path)
 
@@ -130,8 +135,8 @@ for data in input_data:
                 hyperlink_spans.append(_ls)
                 hyperlink_paras.append(_lp)
 
-            output_data[title] = {'hyperlink_titles': hyperlink_titles, 
-                                  'hyperlink_paras': hyperlink_paras, 
+            output_data[title] = {'hyperlink_titles': hyperlink_titles,
+                                  'hyperlink_paras': hyperlink_paras,
                                   'hyperlink_spans': hyperlink_spans,
                                   'text_ner': text_ner}
 
