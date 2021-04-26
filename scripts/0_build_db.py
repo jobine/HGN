@@ -18,7 +18,6 @@ import spacy
 
 from multiprocessing import Pool as ProcessPool
 from tqdm import tqdm
-# from drqa.retriever import utils
 import unicodedata
 
 logger = logging.getLogger()
