@@ -25,7 +25,6 @@ from transformers import (BertConfig, BertForSequenceClassification, BertTokeniz
 
 from utils.feature_extraction import (convert_examples_to_features, output_modes, processors)
 
-# ALL_MODELS = sum((tuple(conf.pretrained_config_archive_map.keys()) for conf in (BertConfig, RobertaConfig)), ())
 from transformers import BERT_PRETRAINED_CONFIG_ARCHIVE_MAP, DEBERTA_V2_PRETRAINED_CONFIG_ARCHIVE_MAP
 
 ALL_MODELS = sum((tuple(conf.keys()) for conf in (BERT_PRETRAINED_CONFIG_ARCHIVE_MAP, DEBERTA_V2_PRETRAINED_CONFIG_ARCHIVE_MAP)), ())
@@ -229,17 +228,17 @@ if __name__ == "__main__":
                                                 do_lower_case=args.do_lower_case)
 
     # Load a trained model that you have fine-tuned
-    model_state_dict = torch.load(args.eval_ckpt, map_location=torch.device('cpu')) #if args.device == 'cpu' else torch.load(args.eval_ckpt)
+    model_state_dict = torch.load(args.eval_ckpt, map_location=torch.device('cpu')) if args.device.type == 'cpu' else torch.load(args.eval_ckpt)
     model = model_class.from_pretrained(args.model_name_or_path,
                                         config=config,
                                         state_dict=model_state_dict)
-    model.cuda()
-    if args.fp16:
-        try:
-            from apex import amp
-        except ImportError:
-            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model = amp.initialize(model, opt_level=args.fp16_opt_level)
+    # model.cuda()
+    # if args.fp16:
+    #     try:
+    #         from apex import amp
+    #     except ImportError:
+    #         raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
+    #     model = amp.initialize(model, opt_level=args.fp16_opt_level)
 
     score = evaluate(args, model, tokenizer, prefix="")
 

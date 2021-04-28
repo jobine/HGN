@@ -97,16 +97,22 @@ preprocess() {
 
         echo "3. Paragraph ranking"
         # Output: para_ranking.json
-        python scripts/3_prepare_para_sel.py $INPUT_FILE $OUTPUT_PROCESSED/hotpot_ss_$DATA_TYPE.csv || error_exit "Failed to select Paragraph"
+        if [[ ! -f $OUTPUT_PROCESSED/hotpot_ss_$DATA_TYPE.csv ]]; then
+          python scripts/3_prepare_para_sel.py $INPUT_FILE $OUTPUT_PROCESSED/hotpot_ss_$DATA_TYPE.csv || error_exit "Failed to select Paragraph"
+        fi
 
         # switch to RoBERTa for final leaderboard
-        # --fp16 if gpu
-        python scripts/3_paragraph_ranking.py --data_dir $OUTPUT_PROCESSED --eval_ckpt $DATA_ROOT/models/finetuned/PS/pytorch_model.bin --raw_data $INPUT_FILE --input_data $OUTPUT_PROCESSED/hotpot_ss_$DATA_TYPE.csv --model_name_or_path "microsoft/deberta-v2-xlarge" --model_type deberta-v2 --max_seq_length 256 --per_gpu_eval_batch_size 128 || error_exit "Failed to rank Paragraph"
+        # --fp16 if gpu, --no_cuda if cpu
+        if [[ ! -f $OUTPUT_PROCESSED/para_ranking.json ]]; then
+          python scripts/3_paragraph_ranking.py --data_dir $OUTPUT_PROCESSED --eval_ckpt $DATA_ROOT/models/finetuned/PS/pytorch_model.bin --raw_data $INPUT_FILE --input_data $OUTPUT_PROCESSED/hotpot_ss_$DATA_TYPE.csv --model_name_or_path "microsoft/deberta-v2-xlarge" --model_type deberta-v2 --max_seq_length 256 --per_gpu_eval_batch_size 128 --fp16 || error_exit "Failed to rank Paragraph"
+        fi
 
         echo "4. MultiHop Paragraph Selection"
         # Input: $INPUT_FILE, doc_link_ner.json,  ner.json, para_ranking.json
         # Output: multihop_para.json
-        python scripts/4_multihop_ps.py $INPUT_FILE $OUTPUT_PROCESSED/doc_link_ner.json $OUTPUT_PROCESSED/ner.json $OUTPUT_PROCESSED/para_ranking.json $OUTPUT_PROCESSED/multihop_para.json || error_exit "Failed to select multiple paragraph"
+        if [[ ! -f $OUTPUT_PROCESSED/multihop_para.json ]]; then
+          python scripts/4_multihop_ps.py $INPUT_FILE $OUTPUT_PROCESSED/doc_link_ner.json $OUTPUT_PROCESSED/ner.json $OUTPUT_PROCESSED/para_ranking.json $OUTPUT_PROCESSED/multihop_para.json || error_exit "Failed to select multiple paragraph"
+        fi
 
         echo "5. Dump features"
 #        python scripts/5_dump_features.py --para_path $OUTPUT_PROCESSED/multihop_para.json --raw_data $INPUT_FILE --model_name_or_path roberta-large --do_lower_case --ner_path $OUTPUT_PROCESSED/ner.json --model_type roberta --tokenizer_name roberta-large --output_dir $OUTPUT_FEAT --doc_link_ner $OUTPUT_PROCESSED/doc_link_ner.json

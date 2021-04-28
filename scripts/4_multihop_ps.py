@@ -17,6 +17,7 @@ ent_data = json.load(open(sys.argv[3], 'r'))
 para_data = json.load(open(sys.argv[4], 'r'))
 output_file = sys.argv[5]
 
+
 def select_titles(question_text, question_entities):
     def custom_key(x):
         # x[1]: start position
@@ -59,6 +60,7 @@ def select_titles(question_text, question_entities):
 
     return non_overlap_titles, overlapped_titles
 
+
 def build_dict(title_list):
     title_to_id, id_to_title = {}, {}
 
@@ -67,6 +69,7 @@ def build_dict(title_list):
         title_to_id[title] = idx
 
     return title_to_id, id_to_title
+
 
 def build_title_to_entities(context, filter_ent_type=[]):
     title_to_ent = {}
@@ -78,6 +81,7 @@ def build_title_to_entities(context, filter_ent_type=[]):
                 if ent[3] not in filter_ent_type:
                     title_to_ent[title].add(ent[0].lower())
     return title_to_ent
+
 
 def build_PG(titles):
     # build hyperlink graph
@@ -94,6 +98,7 @@ def build_PG(titles):
                 para_adj[pi, pj] = 1
 
     return para_adj
+
 
 def bfs_step(start_vec, graph):
     """
