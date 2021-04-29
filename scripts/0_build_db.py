@@ -35,6 +35,7 @@ nlp = spacy.load("en_core_web_lg", disable=['parser'])
 
 PREPROCESS_FN = None
 
+
 def init(filename):
     global PREPROCESS_FN
     if filename:
@@ -50,7 +51,7 @@ def import_module(filename):
 
 
 def normalize(text):
-    unicodedata.normalize('NFD', text)
+    return unicodedata.normalize('NFD', text)
 
 
 # ------------------------------------------------------------------------------
@@ -115,18 +116,40 @@ def store_contents(data_path, save_path, preprocess, num_workers=None):
 
     logger.info('Reading into database...')
     conn = sqlite3.connect(save_path)
+
+    conn.execute("PRAGMA synchronous = OFF")
+
     c = conn.cursor()
     c.execute("CREATE TABLE documents (id PRIMARY KEY, url, title, text, text_with_links, text_ner, sent_num);")
+    conn.commit()
 
     workers = ProcessPool(num_workers, initializer=init, initargs=(preprocess,))
     files = [f for f in iter_files(data_path)]
+
+    total = 0
     count = 0
+    pairs = []
+    statement = "INSERT INTO documents VALUES (?,?,?,?,?,?,?)"
+
     with tqdm(total=len(files)) as pbar:
-        for pairs in tqdm(workers.imap_unordered(get_contents, files)):
-            count += len(pairs)
-            c.executemany("INSERT INTO documents VALUES (?,?,?,?,?,?,?)", pairs)
+        for pair in tqdm(workers.imap_unordered(get_contents, files)):
+            pairs.extend(pair)
+            count += len(pair)
             pbar.update()
-    logger.info('Read %d docs.' % count)
+
+            if count >= 50000:
+                c.executemany(statement, pairs)
+                total += count
+                count = 0
+                pairs = []
+
+        if count > 0:
+            c.executemany(statement, pairs)
+            total += count
+            count = 0
+            pairs = []
+
+    logger.info('Read %d docs.' % total)
     logger.info('Committing...')
     conn.commit()
     conn.close()
@@ -147,6 +170,10 @@ if __name__ == '__main__':
     parser.add_argument('--num-workers', type=int, default=None,
                         help='Number of CPU processes (for tokenizing, etc)')
     args = parser.parse_args()
+
+    args_dict = vars(args)
+    for a in args_dict:
+        logger.info('%-28s  %s' % (a, args_dict[a]))
 
     store_contents(
         args.data_path, args.save_path, args.preprocess, args.num_workers

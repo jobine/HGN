@@ -76,6 +76,18 @@ And then run
 python train.py --config_file configs/train.roberta.json
 ```
 
+## Running on ITP
+### Prepare Docker
+```
+docker build -f hgn.Dockerfile -t <image name>:<tag> .
+```
+```
+docker tag <image name>:<image tag> <docker hub repo>:<tag>
+```
+```
+docker push <docker hub repo>:<tag>
+```
+
 ## Contributing
 
 This project welcomes contributions and suggestions. Most contributions require you to

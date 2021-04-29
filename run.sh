@@ -2,7 +2,7 @@
 
 # DEFINE data related (please make changes according to your configurations)
 # DATA ROOT folder where you put data files
-DATA_ROOT=./data
+DATA_ROOT=/vc_data/mingzhao/hgn
 
 
 PROCS=${1:-"download"} # define the processes you want to run, e.g. "download,preprocess,train" or "preprocess" only
@@ -54,11 +54,11 @@ download() {
 
       # Required: Spacy
       echo "Checking spaCy package en_core_web_lg"
-      python -m spacy info en_core_web_lg || echo "Downloading spaCy package en_core_web_lg";python -m spacy download en_core_web_lg
+      python -m spacy info en_core_web_lg || ( echo "Downloading spaCy package en_core_web_lg";python -m spacy download en_core_web_lg )
 
       if [[ ! -f $DATA_ROOT/knowledge/enwiki_ner.db ]]; then
         echo "Building db"
-        python scripts/0_build_db.py $DATA_ROOT/knowledge/enwiki-20171001-pages-meta-current-withlinks-abstracts $DATA_ROOT/knowledge/enwiki_ner.db
+        python scripts/0_build_db.py $DATA_ROOT/knowledge/enwiki-20171001-pages-meta-current-withlinks-abstracts $DATA_ROOT/knowledge/enwiki_ner.db --num-workers 4
       fi
     else
       echo "Found $DATA_ROOT/knowledge/enwiki_ner.db!"
@@ -90,7 +90,6 @@ preprocess() {
         echo "2. Extract NER for Question and Context"
         # Input: doc_link_ner.json
         # Output: ner.json
-
         if [ ! -f $OUTPUT_PROCESSED/doc_link_ner.json ] || [ ! -f $OUTPUT_PROCESSED/ner.json ]; then
           python scripts/2_extract_ner.py $INPUT_FILE $OUTPUT_PROCESSED/doc_link_ner.json $OUTPUT_PROCESSED/ner.json || error_exit "Failed to extract NER for Question and Context"
         fi

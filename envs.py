@@ -9,7 +9,7 @@ PROJECT_FOLDER = os.path.dirname(__file__)
 sys.path.append(join(PROJECT_FOLDER, 'transformers'))
 
 # Define the dataset folder and model folder based on environment
-HOME_DATA_FOLDER = '.\\data'
+HOME_DATA_FOLDER = '\\vc_data\\mingzhao\\hgn'
 DATASET_FOLDER = join(HOME_DATA_FOLDER, 'dataset')
 MODEL_FOLDER = join(HOME_DATA_FOLDER, 'models')
 KNOWLEDGE_FOLDER = join(HOME_DATA_FOLDER, 'knowledge')
@@ -18,4 +18,4 @@ OUTPUT_FOLDER = join(HOME_DATA_FOLDER, 'outputs')
 os.environ['PYTORCH_PRETRAINED_BERT_CACHE'] = join(HOME_DATA_FOLDER, 'models', 'pretrained_cache')
 
 # Run on CPU
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
