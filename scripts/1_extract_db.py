@@ -5,6 +5,7 @@ import unicodedata
 import re
 import pickle
 import os
+import logging
 
 from urllib.parse import unquote
 from tqdm import tqdm
@@ -92,19 +93,37 @@ class DocDB(object):
     def get_doc_title(self, doc_id):
         return self._get_doc_key(doc_id, 'title')
 
+    def get_doc_id_title_all(self):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT id, title FROM documents")
+        results = cursor.fetchall()
+        cursor.close()
+        return results
+
 
 doc_db = DocDB(db_path)
 
 # 1. map title to ID
-title_to_id = {}
-doc_ids = doc_db.get_doc_ids()
-for doc_id in doc_ids:
-    title = doc_db.get_doc_title(doc_id)
 
-    if title not in title_to_id:
-        title_to_id[title] = doc_id
+# title_to_id = {}
+# doc_ids = doc_db.get_doc_ids()
+#
+# for doc_id in doc_ids:
+#     title = doc_db.get_doc_title(doc_id)
+#
+#     if title not in title_to_id:
+#         title_to_id[title] = doc_id
+
+print("Map title to ID...")
+title_to_id = {}
+doc_id_title_all = doc_db.get_doc_id_title_all()
+print("Total id/title pairs: " + str(len(doc_id_title_all)))
+
+for doc_id, title in doc_id_title_all:
+    title_to_id[title] = doc_id
 
 # 2. extract hyperlink and NER
+print("Extract hyperlink and NER...")
 input_data = json.load(open(input_file, 'r'))
 output_data = {}
 for data in input_data:
@@ -140,4 +159,5 @@ for data in input_data:
                                   'hyperlink_spans': hyperlink_spans,
                                   'text_ner': text_ner}
 
+print(f"Dump to {output_file}")
 json.dump(output_data, open(output_file, 'w'))

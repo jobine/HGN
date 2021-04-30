@@ -16,6 +16,7 @@ nlp = spacy.load("en_core_web_lg", disable=['parser'])
 ent_type = set(["PERSON", "NORP", "FAC", "ORG", "GPE", "LOC", "PRODUCT", "EVENT", "WORK_OF_ART", "LAW", "LANGUAGE"])
             #"DATE", "TIME", "PERCENT", "MONEY", "QUANTITY", "ORDINAL", "CARDINAL"]
 
+
 def extract_ner_from_titles(sent, titles, context_ners=None):
     matched = []
 

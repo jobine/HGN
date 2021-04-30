@@ -1,4 +1,7 @@
-FROM python:3.8
+FROM nvcr.io/nvidia/pytorch:21.04-py3
+CMD nvidia-smi
+
+WORKDIR /workspace
 
 COPY configs ./hgn/configs
 COPY csr_mhqa ./hgn/csr_mhqa
@@ -16,5 +19,11 @@ COPY run.sh ./hgn/run.sh
 COPY requirements.txt ./hgn/requirements.txt
 RUN pip install --no-cache-dir -r ./hgn/requirements.txt
 
-RUN python -m spacy download en_core_web_lg
+#RUN SHA=ToUcHMe git clone https://github.com/NVIDIA/apex.git
+#WORKDIR ./apex
+#ENV TORCH_CUDA_ARCH_LIST="compute capability"
+#RUN pip install -v --disable-pip-version-check --no-cache-dir --use-feature=in-tree-build ./
+#
+#WORKDIR /workspace
 
+RUN python -m spacy download en_core_web_lg

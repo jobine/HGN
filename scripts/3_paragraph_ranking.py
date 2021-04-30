@@ -232,13 +232,13 @@ if __name__ == "__main__":
     model = model_class.from_pretrained(args.model_name_or_path,
                                         config=config,
                                         state_dict=model_state_dict)
-    # model.cuda()
-    # if args.fp16:
-    #     try:
-    #         from apex import amp
-    #     except ImportError:
-    #         raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-    #     model = amp.initialize(model, opt_level=args.fp16_opt_level)
+    model.cuda()
+    if args.fp16:
+        try:
+            from apex import amp
+        except ImportError:
+            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
+        model = amp.initialize(model, opt_level=args.fp16_opt_level)
 
     score = evaluate(args, model, tokenizer, prefix="")
 

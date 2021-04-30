@@ -117,7 +117,7 @@ def store_contents(data_path, save_path, preprocess, num_workers=None):
     logger.info('Reading into database...')
     conn = sqlite3.connect(save_path)
 
-    conn.execute("PRAGMA synchronous = OFF")
+    # conn.execute("PRAGMA synchronous = OFF")
 
     c = conn.cursor()
     c.execute("CREATE TABLE documents (id PRIMARY KEY, url, title, text, text_with_links, text_ner, sent_num);")
