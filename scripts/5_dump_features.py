@@ -23,11 +23,16 @@ from csr_mhqa.data_processing import Example, InputFeatures, get_cached_filename
 from eval.hotpot_evaluate_v1 import normalize_answer
 
 infix_re = re.compile(r'''[-—–~]''')
+
+
 def custom_tokenizer(nlp):
     return Tokenizer(nlp.vocab, infix_finditer=infix_re.finditer)
+
+
 nlp = spacy.load("en_core_web_lg", disable=['tagger', 'parser'])
 nlp.tokenizer.infix_finditer = infix_re.finditer
 #nlp.tokenizer = custom_tokenizer(nlp)
+
 
 def read_hotpot_examples(para_file,
                          full_file,

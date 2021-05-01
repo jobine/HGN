@@ -24,5 +24,5 @@ MODEL_CLASSES = {
     'roberta': (RobertaConfig, RobertaModel, RobertaTokenizer),
     'albert': (AlbertConfig, AlbertModel, AlbertTokenizer),
     'deberta': (DebertaConfig, DebertaModel, DebertaTokenizer),
-    'deberta-v2': (DebertaV2Config, DebertaV2Tokenizer, DebertaV2Model)
+    'deberta-v2': (DebertaV2Config, DebertaV2Model, DebertaV2Tokenizer)
 }

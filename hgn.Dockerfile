@@ -27,3 +27,5 @@ RUN pip install --no-cache-dir -r ./hgn/requirements.txt
 #WORKDIR /workspace
 
 RUN python -m spacy download en_core_web_lg
+
+RUN apt-get install -y vim

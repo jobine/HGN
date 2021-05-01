@@ -3,3 +3,4 @@ spacy==3.0.6
 scikit_learn==0.24.1
 tensorboardX==2.2
 sentencepiece
+ujson
