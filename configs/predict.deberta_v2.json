@@ -1,0 +1,10 @@
+{
+    "output_dir": "/vc_data/mingzhao/hgn/outputs/",
+    "exp_name": "deberta-v2",
+    "model_type": "deberta-v2",
+    "encoder_name_or_path": "microsoft/deberta-v2-xlarge",
+    "fp16": "True",
+    "bi_attn_drop": 0.3,
+    "trans_drop": 0.2,
+    "gnn_drop": 0.3
+}

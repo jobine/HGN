@@ -1,8 +1,8 @@
 {
-    "output_dir": "data\\outputs\\",
+    "output_dir": "/vc_data/mingzhao/hgn/outputs/",
     "exp_name": "roberta",
     "model_type": "roberta",
-    "encoder_name_or_path": "..\\huggingface\\roberta-large\\",
+    "encoder_name_or_path": "roberta-large",
     "fp16": "True",
     "bi_attn_drop": 0.3,
     "trans_drop": 0.2,
