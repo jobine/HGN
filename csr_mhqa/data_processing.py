@@ -171,7 +171,7 @@ class DataIteratorPack(object):
         segment_idxs = torch.LongTensor(self.bsz, self.max_seq_length)
 
         # Mappings
-        if os.environ['CUDA_VISIBLE_DEVICES'] == '-1':
+        if 'CUDA_VISIBLE_DEVICES' in os.environ and os.environ['CUDA_VISIBLE_DEVICES'] == '-1':
             query_mapping = torch.Tensor(self.bsz, self.max_seq_length)
             para_start_mapping = torch.Tensor(self.bsz, self.para_limit, self.max_seq_length)
             para_end_mapping = torch.Tensor(self.bsz, self.para_limit, self.max_seq_length)

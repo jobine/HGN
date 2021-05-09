@@ -138,7 +138,7 @@ scheduler = get_linear_schedule_with_warmup(optimizer,
 ##########################################################################
 global_step = 0
 loss_name = ["loss_total", "loss_span", "loss_type", "loss_sup", "loss_ent", "loss_para"]
-tr_loss, logging_loss = [0] * len(loss_name), [0]* len(loss_name)
+tr_loss, logging_loss = [0] * len(loss_name), [0] * len(loss_name)
 if args.local_rank in [-1, 0]:
     tb_writer = SummaryWriter(args.exp_name)
 
@@ -157,7 +157,7 @@ for epoch in train_iterator:
 
         inputs = {'input_ids':      batch['context_idxs'],
                   'attention_mask': batch['context_mask'],
-                  'token_type_ids': batch['segment_idxs'] if args.model_type in ['bert', 'xlnet'] else None}  # XLM don't use segment_ids
+                  'token_type_ids': batch['segment_idxs'] if args.model_type in ['bert', 'xlnet', 'deberta-v2'] else None}  # XLM don't use segment_ids
 
         batch['context_encoding'] = encoder(**inputs)[0]
         batch['context_mask'] = batch['context_mask'].float().to(args.device)
