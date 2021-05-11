@@ -1,5 +1,5 @@
 {
-    "output_dir": "data/outputs/",
+    "output_dir": "/data/outputs/",
     "exp_name": "deberta-v2",
     "model_type": "deberta-v2",
     "encoder_name_or_path": "microsoft/deberta-v2-xlarge",
