@@ -21,16 +21,18 @@ from tqdm import tqdm, trange
 # This line must be above local package reference
 from transformers import (BertConfig, BertForSequenceClassification, BertTokenizer,
                           RobertaConfig, RobertaTokenizer, RobertaForSequenceClassification,
+                          DebertaConfig, DebertaTokenizer, DebertaForSequenceClassification,
                           DebertaV2Config, DebertaV2Tokenizer, DebertaV2ForSequenceClassification)
 
 from utils.feature_extraction import (convert_examples_to_features, output_modes, processors)
 
-from transformers import BERT_PRETRAINED_CONFIG_ARCHIVE_MAP, DEBERTA_V2_PRETRAINED_CONFIG_ARCHIVE_MAP
+from transformers import BERT_PRETRAINED_CONFIG_ARCHIVE_MAP, DEBERTA_PRETRAINED_CONFIG_ARCHIVE_MAP, DEBERTA_V2_PRETRAINED_CONFIG_ARCHIVE_MAP
 
-ALL_MODELS = sum((tuple(conf.keys()) for conf in (BERT_PRETRAINED_CONFIG_ARCHIVE_MAP, DEBERTA_V2_PRETRAINED_CONFIG_ARCHIVE_MAP)), ())
+ALL_MODELS = sum((tuple(conf.keys()) for conf in (BERT_PRETRAINED_CONFIG_ARCHIVE_MAP, DEBERTA_PRETRAINED_CONFIG_ARCHIVE_MAP, DEBERTA_V2_PRETRAINED_CONFIG_ARCHIVE_MAP)), ())
 
 MODEL_CLASSES = {
     'bert': (BertConfig, BertForSequenceClassification, BertTokenizer),
+    'deberta': (DebertaConfig, DebertaForSequenceClassification, DebertaTokenizer),
     'deberta-v2': (DebertaV2Config, DebertaV2ForSequenceClassification, DebertaV2Tokenizer)
 }
 
@@ -70,7 +72,7 @@ def evaluate(args, model, tokenizer, prefix=""):
         with torch.no_grad():
             inputs = {'input_ids':      batch[0],
                       'attention_mask': batch[1],
-                      'token_type_ids': batch[2] if args.model_type in ['bert', 'xlnet'] else None,  # XLM don't use segment_ids
+                      'token_type_ids': batch[2] if args.model_type in ['bert', 'xlnet', 'deberta'] else None,  # XLM don't use segment_ids
                       'labels':         batch[3]}
             outputs = model(**inputs)
             tmp_eval_loss, logits = outputs[:2]
@@ -142,7 +144,7 @@ def load_and_cache_examples(args, task, tokenizer, evaluate=False):
             cls_token_at_end=bool(args.model_type in ['xlnet']),            # xlnet has a cls token at the end
             cls_token=tokenizer.cls_token,
             sep_token=tokenizer.sep_token,
-            sep_token_extra=bool(args.model_type in ["deberta-v2"]),
+            sep_token_extra=bool(args.model_type in ["deberta"]),
             cls_token_segment_id=2 if args.model_type in ['xlnet'] else 0,
             pad_on_left=bool(args.model_type in ['xlnet']),                 # pad on the left for xlnet
             pad_token_segment_id=4 if args.model_type in ['xlnet'] else 0)

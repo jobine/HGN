@@ -67,6 +67,10 @@ download() {
 
 preprocess() {
     INPUTS=("hotpot_dev_distractor_v1.json;dev_distractor" "hotpot_train_v1.1.json;train")
+    MODEL_TYPE=deberta
+    MODEl_NAME=microsoft/deberta-large
+    TOKENIZER_NAME=microsoft/deberta-large
+
     for input in ${INPUTS[*]}; do
         INPUT_FILE=$(echo $input | cut -d ";" -f 1)
         DATA_TYPE=$(echo $input | cut -d ";" -f 2)
@@ -103,7 +107,7 @@ preprocess() {
         # switch to RoBERTa for final leaderboard
         # --fp16 if gpu, --no_cuda if cpu
         if [[ ! -f $OUTPUT_PROCESSED/para_ranking.json ]]; then
-          python scripts/3_paragraph_ranking.py --data_dir $OUTPUT_PROCESSED --eval_ckpt $DATA_ROOT/models/finetuned/PS/pytorch_model.bin --raw_data $INPUT_FILE --input_data $OUTPUT_PROCESSED/hotpot_ss_$DATA_TYPE.csv --model_name_or_path "microsoft/deberta-v2-xlarge" --model_type deberta-v2 --max_seq_length 256 --per_gpu_eval_batch_size 128 --fp16 || error_exit "Failed to rank Paragraph"
+          python scripts/3_paragraph_ranking.py --data_dir $OUTPUT_PROCESSED --eval_ckpt $DATA_ROOT/models/finetuned/PS/pytorch_model.bin --raw_data $INPUT_FILE --input_data $OUTPUT_PROCESSED/hotpot_ss_$DATA_TYPE.csv --model_name_or_path $MODEl_NAME --model_type $MODEL_TYPE --max_seq_length 256 --per_gpu_eval_batch_size 128 --fp16 || error_exit "Failed to rank Paragraph"
         fi
 
         echo "4. MultiHop Paragraph Selection"
@@ -117,7 +121,7 @@ preprocess() {
         if [[ "`ls $OUTPUT_FEAT`" == "" ]]; then
 #        python scripts/5_dump_features.py --para_path $OUTPUT_PROCESSED/multihop_para.json --raw_data $INPUT_FILE --model_name_or_path roberta-large --do_lower_case --ner_path $OUTPUT_PROCESSED/ner.json --model_type roberta --tokenizer_name roberta-large --output_dir $OUTPUT_FEAT --doc_link_ner $OUTPUT_PROCESSED/doc_link_ner.json
 #        python scripts/5_dump_features.py --para_path $OUTPUT_PROCESSED/multihop_para.json --raw_data $INPUT_FILE --model_name_or_path albert-xxlarge-v2 --do_lower_case --ner_path $OUTPUT_PROCESSED/ner.json --model_type albert --tokenizer_name albert-xxlarge-v2 --output_dir $OUTPUT_FEAT --doc_link_ner $OUTPUT_PROCESSED/doc_link_ner.json
-          python scripts/5_dump_features.py --para_path $OUTPUT_PROCESSED/multihop_para.json --full_data $INPUT_FILE --model_name_or_path "microsoft/deberta-v2-xlarge" --do_lower_case --ner_path $OUTPUT_PROCESSED/ner.json --model_type deberta-v2 --tokenizer_name "microsoft/deberta-v2-xlarge" --output_dir $OUTPUT_FEAT --doc_link_ner $OUTPUT_PROCESSED/doc_link_ner.json
+          python scripts/5_dump_features.py --para_path $OUTPUT_PROCESSED/multihop_para.json --full_data $INPUT_FILE --model_name_or_path $MODEl_NAME --do_lower_case --ner_path $OUTPUT_PROCESSED/ner.json --model_type $MODEL_TYPE --tokenizer_name $TOKENIZER_NAME --output_dir $OUTPUT_FEAT --doc_link_ner $OUTPUT_PROCESSED/doc_link_ner.json
         fi
 
         echo "6. Test dumped features"
